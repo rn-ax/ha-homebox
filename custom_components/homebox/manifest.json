@@ -1,8 +1,8 @@
 {
   "domain": "homebox",
   "name": "HomeBox",
-  "version": "0.6.2",
-  "codeowners": ["@JeffreyDissmann"],
+  "version": "0.5.1",
+  "codeowners": ["@rn-ax/all-stars"],
   "config_flow": true,
   "documentation": "https://github.com/JeffreyDissmann/ha-homebox#readme",
   "issue_tracker": "https://github.com/JeffreyDissmann/ha-homebox/issues",
