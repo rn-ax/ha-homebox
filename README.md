@@ -13,7 +13,7 @@
 
 A custom Home Assistant integration that connects to [HomeBox](https://github.com/sysadminsmedia/homebox), exposes inventory statistics, and supports linking Home Assistant devices to HomeBox items.
 
-[![Open your Home Assistant instance and add this repository inside HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JeffreyDissmann&repository=ha-homebox&category=integration)
+[![Open your Home Assistant instance and add this repository inside HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rn-ax&repository=ha-homebox&category=integration)
 [![Open your Home Assistant instance and start setting up HomeBox](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=homebox)
 
 ## Features
