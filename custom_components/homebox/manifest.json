@@ -3,6 +3,7 @@
   "name": "HomeBox",
   "version": "0.5.1",
   "codeowners": ["@rn-ax/all-stars"],
+  "after_dependencies": ["recorder"],
   "config_flow": true,
   "documentation": "https://github.com/rn-ax/ha-homebox#readme",
   "issue_tracker": "https://github.com/rn-ax/ha-homebox/issues",

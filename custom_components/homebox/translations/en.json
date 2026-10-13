@@ -47,7 +47,7 @@
                 "data_description": {
                     "area": "Select an existing Home Assistant room to suggest for the HomeBox device",
                     "api_key": "A HomeBox API key (Profile → API tokens). It is sent directly to HomeBox, so no login is performed.",
-                    "host": "URL or hostname of your HomeBox instance. Common ports are 7745 (default) or 3100 (common Docker mapping), for example: http://homebox.local:3100",
+                    "host": "URL or hostname of your HomeBox instance. Common ports are 7745 (default) or 3100 (common Docker mapping)",
                     "name": "Device name shown in Home Assistant (default: HomeBox)"
                 }
             },
@@ -63,7 +63,7 @@
                 },
                 "data_description": {
                     "area": "Select an existing Home Assistant room to suggest for the HomeBox device",
-                    "host": "URL or hostname of your HomeBox instance. Common ports are 7745 (default) or 3100 (common Docker mapping), for example: http://homebox.local:3100",
+                    "host": "URL or hostname of your HomeBox instance. Common ports are 7745 (default) or 3100 (common Docker mapping)",
                     "name": "Device name shown in Home Assistant (default: HomeBox)",
                     "password": "Password of your HomeBox account",
                     "username": "Email address of your HomeBox account"

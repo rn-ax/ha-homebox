@@ -17,6 +17,7 @@ jobs:
     # `issues` is skipped org-wide: this org tracks work in atask, not
     # GitHub Issues, so has_issues stays false everywhere -- HACS's own
     # check requires it enabled, which isn't a real correctness problem.
+    # `license`: upstream ships none and a fork cannot grant one.
     with:
-      hacs_ignore: issues
+      hacs_ignore: issues license
     secrets: inherit

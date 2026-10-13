@@ -4,3 +4,4 @@ repository:
   name: ha-homebox
   description: Home Assistant integration for HomeBox -- rn-ax fork adding API key authentication and Home Assistant 2026 compatibility
   private: false
+  topics: home-assistant, hacs, homebox, integration
