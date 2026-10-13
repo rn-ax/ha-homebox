@@ -1,13 +1,24 @@
 # HomeBox for Home Assistant (HACS)
 
+> [!IMPORTANT]
+> This is the rn-ax fork of [JeffreyDissmann/ha-homebox](https://github.com/JeffreyDissmann/ha-homebox). It exists because upstream has two open, mergeable pull requests that have not been picked up, and the upstream repository has no licence ([upstream issue #8](https://github.com/JeffreyDissmann/ha-homebox/issues/8)). Switch back to upstream once it merges both pull requests.
+>
+> Changes from upstream:
+>
+> - API key authentication, with a config flow menu to choose between API key and email/password ([upstream #9](https://github.com/JeffreyDissmann/ha-homebox/pull/9) by @ltomes)
+> - Home Assistant 2026 device registry compatibility, and creation of the location entity type when a HomeBox group has none ([upstream #10](https://github.com/JeffreyDissmann/ha-homebox/pull/10) by @tmeuze)
+> - Repository tooling: CI via the shared integration workflow, Renovate, a scheduled upstream-sync pull request, and the manifest `codeowners` set to the org team
+>
+> Install it in HACS as a custom repository: `https://github.com/rn-ax/ha-homebox`, category Integration.
+
 A custom Home Assistant integration that connects to [HomeBox](https://github.com/sysadminsmedia/homebox), exposes inventory statistics, and supports linking Home Assistant devices to HomeBox items.
 
-[![Open your Home Assistant instance and add this repository inside HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JeffreyDissmann&repository=ha-homebox&category=integration)
+[![Open your Home Assistant instance and add this repository inside HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rn-ax&repository=ha-homebox&category=integration)
 [![Open your Home Assistant instance and start setting up HomeBox](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=homebox)
 
 ## Features
 
-- UI config flow (`host`, `username`, `password`, integration name, optional area)
+- UI config flow (`host`, API key or `username` and `password`, integration name, optional area)
 - Polling-based HomeBox statistics sensors:
   - `homebox_total_items`
   - `homebox_total_locations`

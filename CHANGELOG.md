@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - 2026-10-05
+
+### Fixed
+
+- Replaced deprecated `device_registry.devices.values()` usage that Home Assistant 2026.x warns about (removal planned for 2027.9.0).
+- Creating a location no longer fails with "No location entity type found in HomeBox" on HomeBox groups that have no location entity type yet; one is now created on demand.
+- The area sync warning now includes the underlying error message.
+
 ## [0.5.1] - 2026-04-25
 
 ### Changed

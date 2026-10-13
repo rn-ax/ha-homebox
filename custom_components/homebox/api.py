@@ -226,6 +226,24 @@ class HomeBoxApiClient:
 
         self._token = self._normalize_token(token)
 
+    async def async_authenticate_with_api_key(self, api_key: str) -> None:
+        """Authenticate with a static HomeBox API key.
+
+        HomeBox static API keys are long-lived and are accepted directly as the
+        Authorization value, so no login round-trip is needed. The key is stored
+        as the token and verified with a lightweight authenticated request.
+        """
+        token = self._normalize_token(api_key)
+        if not token:
+            raise HomeBoxAuthenticationError("HomeBox API key is empty")
+
+        self._token = token
+        try:
+            await self.async_get_group_statistics()
+        except HomeBoxApiError:
+            self._token = None
+            raise
+
     async def async_get_total_items(self) -> int:
         """Return total item count from HomeBox group statistics."""
         return (await self.async_get_group_statistics()).total_items
@@ -275,7 +293,20 @@ class HomeBoxApiClient:
                     self._location_entity_type_id = type_id
                     return type_id
 
-        raise HomeBoxApiError("No location entity type found in HomeBox")
+        # HomeBox only creates its default location type lazily, so a group
+        # that has never used locations may not have one yet.
+        created = await self._async_request_json(
+            "POST",
+            "v1/entity-types",
+            auth_required=True,
+            error_context="create location entity type",
+            payload={"name": "Location", "isLocation": True, "icon": ""},
+        )
+        type_id = created.get("id") if isinstance(created, dict) else None
+        if not isinstance(type_id, str) or not type_id:
+            raise HomeBoxApiError("Could not create a location entity type in HomeBox")
+        self._location_entity_type_id = type_id
+        return type_id
 
     async def async_get_locations(self) -> list[dict[str, Any]]:
         """Return all HomeBox locations."""

@@ -43,6 +43,7 @@ from .api import (
     normalize_homebox_host,
 )
 from .const import (
+    CONF_API_KEY,
     CONF_AREA,
     CONF_HA_DEVICE_ID,
     CONF_HB_ITEM_DESCRIPTION,
@@ -67,7 +68,16 @@ _MANUAL_HA_DEVICE_SELECTION = "__manual__"
 _MAX_SUGGESTED_HA_DEVICES = 3
 CONF_HA_DEVICE_IDS = "ha_device_ids"
 
-STEP_USER_DATA_SCHEMA = vol.Schema(
+STEP_API_KEY_DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_HOST): str,
+        vol.Required(CONF_API_KEY): str,
+        vol.Required(CONF_NAME, default=DEFAULT_NAME): str,
+        vol.Optional(CONF_AREA): selector.AreaSelector(),
+    }
+)
+
+STEP_CREDENTIALS_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HOST): str,
         vol.Required(CONF_USERNAME): str,
@@ -103,12 +113,24 @@ class _CreateAndLinkResult:
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Validate the user input allows us to connect.
 
-    Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
+    Data holds host, name, optional area, and one authentication method:
+    either an API key or a username and password.
     """
     api = HomeBoxApiClient(data[CONF_HOST], async_get_clientsession(hass))
 
+    api_key = (data.get(CONF_API_KEY) or "").strip()
+    username = (data.get(CONF_USERNAME) or "").strip()
+    password = data.get(CONF_PASSWORD) or ""
+
     try:
-        await api.async_authenticate(data[CONF_USERNAME], data[CONF_PASSWORD])
+        if api_key:
+            await api.async_authenticate_with_api_key(api_key)
+        elif username or password:
+            await api.async_authenticate(username, password)
+        else:
+            raise InvalidAuth(
+                "Provide a HomeBox API key, or a username and password."
+            )
         await api.async_get_total_items()
     except HomeBoxAuthenticationError as err:
         raise InvalidAuth(str(err)) from err
@@ -143,7 +165,19 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Handle the initial step."""
+        """Let the user choose how to authenticate with HomeBox."""
+        return self.async_show_menu(
+            step_id="user",
+            menu_options=["api_key", "credentials"],
+        )
+
+    async def _async_handle_auth_step(
+        self,
+        step_id: str,
+        data_schema: vol.Schema,
+        user_input: dict[str, Any] | None,
+    ) -> ConfigFlowResult:
+        """Validate one authentication method and create the entry."""
         errors: dict[str, str] = {}
         suggested_values: dict[str, Any] = {}
         if user_input is not None:
@@ -171,12 +205,28 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             }
 
         return self.async_show_form(
-            step_id="user",
+            step_id=step_id,
             data_schema=self.add_suggested_values_to_schema(
-                STEP_USER_DATA_SCHEMA, suggested_values
+                data_schema, suggested_values
             ),
             errors=errors,
             description_placeholders={"auth_error_detail": self._auth_error_detail},
+        )
+
+    async def async_step_api_key(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle authentication with a HomeBox API key."""
+        return await self._async_handle_auth_step(
+            "api_key", STEP_API_KEY_DATA_SCHEMA, user_input
+        )
+
+    async def async_step_credentials(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle authentication with an email address and password."""
+        return await self._async_handle_auth_step(
+            "credentials", STEP_CREDENTIALS_DATA_SCHEMA, user_input
         )
 
     async def async_step_integration_discovery(
@@ -1081,6 +1131,18 @@ def _format_ha_model_number(ha_device: dr.DeviceEntry) -> str:
     return model or model_id
 
 
+def _iter_devices(device_registry: dr.DeviceRegistry) -> list[dr.DeviceEntry]:
+    """Return all device entries without using the deprecated mapping API.
+
+    Newer Home Assistant iterates ``devices`` as entries; older versions
+    iterate it as a dict of device IDs.
+    """
+    return [
+        device_registry.async_get(item) if isinstance(item, str) else item
+        for item in device_registry.devices
+    ]
+
+
 def _get_unlinked_named_ha_devices(
     hass: HomeAssistant, config_entry: ConfigEntry
 ) -> list[dr.DeviceEntry]:
@@ -1090,7 +1152,7 @@ def _get_unlinked_named_ha_devices(
     linked_ha_device_ids = set(ha_device_to_hb_item)
     return [
         device
-        for device in device_registry.devices.values()
+        for device in _iter_devices(device_registry)
         if (device.name_by_user or device.name)
         and device.id not in linked_ha_device_ids
         and not any(identifier[0] == DOMAIN for identifier in device.identifiers)
@@ -1103,7 +1165,7 @@ def _get_areas_with_devices(
     """Return areas that contain at least one named non-HomeBox device."""
     used_area_ids = {
         device.area_id
-        for device in device_registry.devices.values()
+        for device in _iter_devices(device_registry)
         if device.area_id
         and (device.name_by_user or device.name)
         and not any(identifier[0] == DOMAIN for identifier in device.identifiers)
@@ -1122,7 +1184,7 @@ def _get_named_ha_devices_in_area(
     device_registry = dr.async_get(hass)
     return [
         device
-        for device in device_registry.devices.values()
+        for device in _iter_devices(device_registry)
         if device.area_id == area_id
         and (device.name_by_user or device.name)
         and not any(identifier[0] == DOMAIN for identifier in device.identifiers)

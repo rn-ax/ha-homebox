@@ -1,0 +1,40 @@
+name: Upstream sync
+
+on:
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Merge upstream into a sync branch and open a PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/JeffreyDissmann/ha-homebox.git
+          git fetch upstream main
+          if git merge-base --is-ancestor upstream/main HEAD; then
+            echo "Already up to date with upstream."
+            exit 0
+          fi
+          branch="upstream-sync/$(git rev-parse --short upstream/main)"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then
+            echo "Sync branch $branch already exists."
+            exit 0
+          fi
+          git checkout -b "$branch"
+          git merge --no-edit upstream/main
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" --title "Sync upstream" \
+            --body "Merges new commits from upstream \`main\` into the fork."

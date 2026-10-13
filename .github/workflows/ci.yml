@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci:
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: rn-ax/poppycock/.github/workflows/ha-integration-ci.yml@main
+    # `issues` is skipped org-wide: this org tracks work in atask, not
+    # GitHub Issues, so has_issues stays false everywhere -- HACS's own
+    # check requires it enabled, which isn't a real correctness problem.
+    # `license`: upstream ships none and a fork cannot grant one.
+    with:
+      hacs_ignore: issues license
+    secrets: inherit
