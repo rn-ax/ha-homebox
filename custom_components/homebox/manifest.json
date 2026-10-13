@@ -1,13 +1,17 @@
 {
   "domain": "homebox",
   "name": "HomeBox",
-  "version": "0.5.1",
-  "codeowners": ["@rn-ax/all-stars"],
-  "after_dependencies": ["recorder"],
+  "after_dependencies": [
+    "recorder"
+  ],
+  "codeowners": [
+    "@rn-ax/all-stars"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/rn-ax/ha-homebox#readme",
-  "issue_tracker": "https://github.com/rn-ax/ha-homebox/issues",
   "integration_type": "hub",
   "iot_class": "local_polling",
-  "requirements": []
+  "issue_tracker": "https://github.com/rn-ax/ha-homebox/issues",
+  "requirements": [],
+  "version": "0.5.1"
 }
